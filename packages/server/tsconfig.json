@@ -4,7 +4,7 @@
     // File Layout
     // "rootDir": "./src",
     // "outDir": "./dist",
-    "baseUrl": ".", 
+    "baseUrl": "./src", 
     "paths": {
       "@react-express-library/shared": ["../shared/src/"],
       "@react-express-library/client": ["../client/src/"],
@@ -12,7 +12,7 @@
     
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    "module": "CommonJS",
+    "module": "NodeNext",
     "target": "ES2022",
     "types": [],
     "esModuleInterop": true,   // <--- ADD THIS LINE

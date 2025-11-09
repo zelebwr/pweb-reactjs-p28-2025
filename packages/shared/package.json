@@ -13,10 +13,8 @@
     "license": "ISC",
     "packageManager": "pnpm@10.20.0",
     "devDependencies": {
+        "@prisma/client": "^6.19.0",
         "prisma": "^6.19.0",
         "typescript": "^5.9.3"
-    },
-    "dependencies": {
-        "@prisma/client": "^6.19.0"
     }
 }

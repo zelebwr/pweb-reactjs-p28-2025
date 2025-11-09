@@ -1,7 +1,7 @@
 // packages/shared/src/types/transaction.types.ts
 
 // Import other shared types that we will nest inside these types
-import { PublicUser } from "@react-express-library/shared";
+import { PublicUser } from "./user.types";
 
 // ----------------------------------------------------------------
 // --- Frontend -> Server (Data Sent TO the Backend) ---
