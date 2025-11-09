@@ -4,7 +4,6 @@ import { AuthRequest } from "../middlewares/auth.middleware"; // Akan kita buat 
 
 import { isValiEmail, validatePassword } from "../utils/validation";
 import { LoginInput, RegisterInput } from "@react-express-library/shared";
-import { resourceUsage } from "process";
 
 /**
  * Handler untuk endpoint registrasi (POST /auth/register).

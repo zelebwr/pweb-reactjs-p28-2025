@@ -4,6 +4,11 @@
     // File Layout
     // "rootDir": "./src",
     // "outDir": "./dist",
+    "baseUrl": ".", 
+    "paths": {
+      "@react-express-library/shared": ["../shared/src/"],
+      "@react-express-library/client": ["../client/src/"],
+    },
     
     // Environment Settings
     // See also https://aka.ms/tsconfig/module

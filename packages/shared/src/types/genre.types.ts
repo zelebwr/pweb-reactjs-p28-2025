@@ -1,6 +1,5 @@
 // packages/shared/src/types/genre.types.ts
 
-// Import the base 'Genre' model type from Prisma
 import { Genre } from "@prisma/client";
 
 // ----------------------------------------------------------------
@@ -8,28 +7,34 @@ import { Genre } from "@prisma/client";
 // ----------------------------------------------------------------
 
 /**
- * Data required for the "Create Genre" form.
- * This is what the frontend sends to POST /genre.
- * Based on your API, only a 'name' is needed.
+ * Data required for the "Create Genre" form (POST /genre).
  */
 export type CreateGenreInput = Pick<Genre, "name">;
 
 /**
- * Data required for the "Update Genre" form.
- * This is what the frontend sends to PATCH /genre/:id.
- * Based on your API, only a 'name' is needed.
+ * Data required for the "Update Genre" form (PATCH /genre/:id).
  */
 export type UpdateGenreInput = Pick<Genre, "name">;
+
+/**
+ * Query parameters for the "Get All Genres" endpoint (GET /genre).
+ * Defines all filters, sorting, and pagination.
+ */
+export interface ApiGenreQuery {
+    page?: string;
+    limit?: string;
+    search?: string;
+    orderByName?: "asc" | "desc";
+}
 
 // ----------------------------------------------------------------
 // --- Server -> Frontend (Data Sent FROM the Backend) ---
 // ----------------------------------------------------------------
 
 /**
- * Represents the *minimal* genre data returned in a list.
- * This is what the backend sends from GET /genre for the "Get All Genres" list.
- * Your service layer specifically selects only id and name.
- * This is perfect for populating the "Add Book" form's dropdown!
+ * Represents the *minimal* genre data returned in a list (GET /genre).
+ * Your service selects only id and name.
+ * Perfect for the "Add Book" form's dropdown.
  */
 export interface ApiGenre {
     id: string;
@@ -37,27 +42,17 @@ export interface ApiGenre {
 }
 
 /**
- * Represents the *full* genre data returned as a single item.
- * This is what the backend sends from:
- * - POST /genre (on success)
- * - GET /genre/:id (for detail page)
- * - PATCH /genre/:id (on success)
- * We Omit 'deletedAt' as it's a private field not needed by the client.
+ * Represents the *full* genre data returned for a single item.
+ * This is sent from POST /genre, GET /genre/:id, and PATCH /genre/:id.
+ * We Omit 'deletedAt' as it's a private field.
  */
 export type ApiGenreDetail = Omit<Genre, "deletedAt">;
 
 /**
- * The full response object from the GET /genre (Get All) endpoint.
- * Your React component will use this to get the list of genres
- * and the pagination data.
+ * The full response object for the paginated genre list (GET /genre).
+ * Your service returns this, and the controller builds the 'meta' object.
  */
-export interface ApiGetAllGenresResponse {
-    data: ApiGenre[];
-    meta: {
-        page: number;
-        limit: number;
-        total: number;
-        next_page: number | null;
-        prev_page: number | null;
-    };
+export interface ApiGenreListResponse {
+    genres: ApiGenre[];
+    total: number;
 }

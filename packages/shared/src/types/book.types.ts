@@ -1,19 +1,13 @@
 // packages/shared/src/types/book.types.ts
 
-// Import types directly from the Prisma client.
-// This ensures that if you change your schema.prisma, these types update.
-import { Book, BookCondition } from "@prisma/client";
+import { Book, BookCondition, Prisma } from "@prisma/client";
 
 // ----------------------------------------------------------------
 // --- Frontend -> Server (Data Sent TO the Backend) ---
 // ----------------------------------------------------------------
 
 /**
- * Data required for the "Add New Book" form.
- * [cite_start]This is what the frontend sends to POST /books[cite: 77].
- * We use Omit<> to base it on the Prisma 'Book' model, but
- * exclude fields the database generates itself.
- * This automatically includes the new 'condition' field.
+ * Data for the "Add New Book" form (POST /books).
  */
 export type CreateBookInput = Omit<
     Book,
@@ -21,24 +15,32 @@ export type CreateBookInput = Omit<
 >;
 
 /**
- * Data required for the "Edit Book" form.
- * This is what the frontend sends to PATCH /books/:id.
- * The practicum documentation specifies only these fields are
- * editable.
- * - Pick<> ensures only these fields can be chosen.
- * - Partial<> makes them all optional (so you can update just one).
+ * Data for the "Edit Book" form (PATCH /books/:id).
  */
 export type UpdateBookInput = Partial<
     Pick<Book, "description" | "price" | "stockQuantity">
 >;
+
+/**
+ * Query parameters for "Get All" book endpoints (GET /books, GET /books/genre/:id).
+ * This defines all the filters, sorting, and pagination.
+ */
+export interface ApiBookQuery {
+    page?: string;
+    limit?: string;
+    search?: string;
+    orderByTitle?: "asc" | "desc";
+    orderByPublishDate?: "asc" | "desc";
+    condition?: BookCondition;
+}
 
 // ----------------------------------------------------------------
 // --- Server -> Frontend (Data Sent FROM the Backend) ---
 // ----------------------------------------------------------------
 
 /**
- * Represents the shape of a book object as returned by the API.
- * This is the "safe" data your React components will receive and display.
+ * The full book object returned by GET /books/:id.
+ * This is the "main" book type your frontend will use.
  */
 export interface ApiBook {
     id: string;
@@ -49,16 +51,39 @@ export interface ApiBook {
     description: string | null;
     price: number;
     stockQuantity: number;
-    /**
-     * We include the 'condition' from the schema.
-     */
     condition: BookCondition;
-    /**
-     * Note: This is 'string'. This is because your book.service.ts
-     * correctly formats the data to return only the genre *name*,
-     * not the full genre object.
-     */
     genre: string;
+}
+
+/**
+ * The minimal data returned after *creating* a book (POST /books).
+ * Your service selects only these fields.
+ */
+export interface ApiBookCreateResponse {
+    id: string;
+    title: string;
+    createdAt: Date;
+}
+
+/**
+ * The data returned after *updating* a book (PATCH /books/:id).
+ * Your service selects only these fields.
+ */
+export interface ApiBookUpdateResponse {
+    id: string;
+    title: string;
+    updatedAt: Date;
+    price: number;
+    stockQuantity: number;
+}
+
+/**
+ * The full response object for paginated book lists.
+ * This is what GET /books and GET /books/genre/:id return.
+ */
+export interface ApiBookListResponse {
+    books: ApiBook[];
+    total: number;
 }
 
 // ----------------------------------------------------------------
@@ -66,9 +91,8 @@ export interface ApiBook {
 // ----------------------------------------------------------------
 
 /**
- * Re-exporting the BookCondition enum from the Prisma client.
- * - The Backend uses this for validation and database queries.
- * - The Frontend uses this to build the "Filter by condition"
- * [cite_start]dropdown menu[cite: 34].
+ * Re-exporting the BookCondition enum from Prisma.
+ * - Backend uses this for validation & queries.
+ * - Frontend uses this for filter dropdowns.
  */
 export { BookCondition };

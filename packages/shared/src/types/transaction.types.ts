@@ -29,6 +29,19 @@ export interface CreateTransactionInput {
     books: BookOrderItem[];
 }
 
+/**
+ * Query parameters for the "Get All Transactions" endpoint (GET /transactions).
+ * Defines all filters, sorting, and pagination.
+ */
+export interface ApiTransactionQuery {
+    page?: string;
+    limit?: string;
+    search?: string;
+    orderById?: "asc" | "desc";
+    orderByAmount?: "asc" | "desc";
+    orderByPrice?: "asc" | "desc";
+}
+
 // ----------------------------------------------------------------
 // --- Server -> Frontend (Data Sent FROM the Backend) ---
 // ----------------------------------------------------------------
@@ -66,25 +79,18 @@ export interface ApiTransaction {
     id: string;
     totalPrice: number;
     totalAmount: number;
-    createdAt: string; // or Date, depending on JSON serialization
+    createdAt: Date; // Your service returns a Date object
     user: PublicUser;
     books: ApiTransactionBookItem[];
 }
 
 /**
- * The full response object from the GET /transactions (Get All) endpoint.
- * Your React component will use this to get the list of transactions
- * and the pagination data.
+ * The full response object for the paginated transaction list (GET /transactions).
+ * Your service returns this, and the controller builds the 'meta' object.
  */
-export interface ApiGetAllTransactionsResponse {
-    data: ApiTransaction[];
-    meta: {
-        page: number;
-        limit: number;
-        total: number;
-        next_page: number | null;
-        prev_page: number | null;
-    };
+export interface ApiTransactionListResponse {
+    transactions: ApiTransaction[];
+    total: number;
 }
 
 /**
@@ -111,7 +117,7 @@ export interface ApiTransactionDetail {
     id: string;
     totalPrice: number;
     totalAmount: number;
-    createdAt: string; // or Date
+    createdAt: Date; // Your service returns a Date object
     user: PublicUser;
     books: ApiTransactionDetailBookItem[];
 }
