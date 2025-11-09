@@ -1,27 +1,49 @@
-// This the "safe" User object to be sent to be received to Clients -- no password field
-export interface User {
+// packages/shared/src/types/user.types.ts
+import { User } from "@prisma/client";
+
+// ----------------------------------------------------------------
+// --- Frontend -> Server (Data Sent TO the Backend) ---
+// ----------------------------------------------------------------
+
+/**
+ * Data required for the "Login" form.
+ * This is what the frontend sends to POST /auth/login
+ */
+export type LoginInput = Pick<User, "email" | "password">;
+
+/**
+ * Data required for the "Register" form.
+ * This is what the frontend sends to POST /auth/register
+ */
+export type RegisterInput = Pick<User, "email" | "password"> &
+    Partial<Pick<User, "username">>;
+
+// ----------------------------------------------------------------
+// --- Server -> Frontend (Data Sent FROM the Backend) ---
+// ----------------------------------------------------------------
+
+/**
+ * Represents the publicly-safe user data.
+ * This is sent from GET /auth/me and is safe to store
+ * in your frontend's global state.
+ */
+export interface PublicUser {
     id: string;
-    username: string | null;
     email: string;
-    createdAt: Date;
-    updatedAt: Date;
+    username: string | null;
 }
 
-// Data shape for the /auth/register endpoint body
-export type RegisterData = {
-    email: string;
-    password: string;
-    username?: string;
-};
-
-// Data shape for the /auth/login endpoint body
-export type LoginData = {
-    email: string;
-    password: string;
-};
-
-// The response from a successful login
+/**
+ * The data sent in the response body from POST /auth/login
+ */
 export interface LoginResponse {
-    user: User;
-    token: string;
+    access_token: string;
+}
+
+/**
+ * The data sent in the response body from POST /auth/register
+ * This includes the new user's details (minus password).
+ */
+export interface RegisterResponse extends PublicUser {
+    createdAt: Date;
 }
