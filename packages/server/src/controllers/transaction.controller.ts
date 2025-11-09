@@ -1,15 +1,24 @@
 import { Request, Response } from "express";
 import * as transactionService from "../services/transaction.service";
 
+import {
+    ApiTransactionQuery,
+    CreateTransactionInput,
+} from "@react-express-library/shared";
+
+import { AuthRequest } from "../middlewares/auth.middleware";
+
 /**
  * * Handles HTTP Requests to get all transactions.
  * @author zelebwr
  */
 export const getAllTransactions = async (req: Request, res: Response) => {
     try {
-        const result = await transactionService.getAllTransactions(req.query);
-        const page = Number(req.query.page) || 1;
-        const limit = Number(req.query.limit) || 10;
+        const query = req.query as ApiTransactionQuery;
+        const result = await transactionService.getAllTransactions(query);
+
+        const page = Number(query.page) || 1;
+        const limit = Number(query.limit) || 10;
 
         return res.status(200).json({
             success: true,
@@ -45,6 +54,14 @@ export const getAllTransactions = async (req: Request, res: Response) => {
 export const getTransactionById = async (req: Request, res: Response) => {
     try {
         const { transaction_id } = req.params;
+
+        if (!transaction_id) {
+            return res.status(400).json({
+                success: false,
+                message: "Transaction ID is required",
+            });
+        }
+
         const transaction = await transactionService.getTransactionById(
             transaction_id
         );
@@ -89,14 +106,24 @@ export const getTransactionById = async (req: Request, res: Response) => {
  * @param req Express Request object. Expects body: { userId: string, books: [{ bookId: string, quantity: number }] }
  * @param res Express Response object.
  */
-export const createTransaction = async (req: Request, res: Response) => {
+export const createTransaction = async (req: AuthRequest, res: Response) => {
     try {
-        const { userId, books } = req.body;
+        const userId = req.user?.id;
 
-        if (!userId || !Array.isArray(books) || books.length === 0) {
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized: User ID not found in request.",
+            });
+        }
+
+        const { books } = req.body as CreateTransactionInput;
+        
+
+        if (!Array.isArray(books) || books.length === 0) {
             return res.status(400).json({
                 message:
-                    "Request body must include userId and a non-empty array of books.",
+                    "Request body must include a non-empty array of books.",
             });
         }
 
@@ -105,7 +132,11 @@ export const createTransaction = async (req: Request, res: Response) => {
             books
         );
 
-        return res.status(201).json(newTransaction);
+        return res.status(201).json({
+            success: true,
+            message: "Transaction created successfully",
+            data: newTransaction,
+        });
     } catch (error: unknown) {
         if (error instanceof Error) {
             // Bad Request
@@ -159,7 +190,11 @@ export const createTransaction = async (req: Request, res: Response) => {
 export const getTransactionStatistics = async (req: Request, res: Response) => {
     try {
         const stats = await transactionService.getTransactionStatistics();
-        return res.status(200).json(stats);
+        return res.status(200).json({
+            success: true,
+            message: "Transaction statistics retrieved successfully",
+            data: stats,
+        });
     } catch (error: unknown) {
         console.error(`[ERROR] Failed to get transaction stats: ${error}`);
 

@@ -1,10 +1,15 @@
-import prisma from "../config/prisma";
+import { prisma } from "../config/prisma";
 import { Prisma } from "@prisma/client";
 
-type BookOrderItem = {
-    bookId: string;
-    quantity: number;
-};
+import {
+    ApiTransaction,
+    ApiTransactionDetail,
+    ApiTransactionListResponse,
+    ApiTransactionQuery,
+    ApiTransactionStatistics,
+    BookOrderItem,
+    CreateTransactionResponse,
+} from "@react-express-library/shared";
 
 /**
  * * Retrieve a list of all transactions.
@@ -12,7 +17,7 @@ type BookOrderItem = {
  * @return An array of transaction objects.
  * @description List of all transactions, including user information and details about the boks in each transaction.
  */
-export const getAllTransactions = async (query: any) => {
+export const getAllTransactions = async (query: ApiTransactionQuery): Promise<ApiTransactionListResponse> => {
     try {
         const {
             page = 1,
@@ -80,7 +85,7 @@ export const getAllTransactions = async (query: any) => {
         });
 
         return {
-            transactions,
+            transactions: transactions as any,
             total: totalTransactions,
         };
     } catch (error) {
@@ -96,7 +101,7 @@ export const getAllTransactions = async (query: any) => {
  * @return The transaction object or null if not found.
  * @description Includes user details and detailed book information for the specific transaction.
  */
-export const getTransactionById = async (id: string) => {
+export const getTransactionById = async (id: string): Promise<ApiTransactionDetail> => {
     try {
         const transaction = await prisma.transaction.findUnique({
             where: {
@@ -130,7 +135,7 @@ export const getTransactionById = async (id: string) => {
             throw new Error("Transaction not found");
         }
 
-        return transaction;
+        return transaction as any;
     } catch (error: unknown) {
         console.error("Error retrieving transaction by ID:", error);
 
@@ -163,7 +168,7 @@ export const getTransactionById = async (id: string) => {
 export const createTransaction = async (
     userId: string,
     books: BookOrderItem[]
-) => {
+): Promise<CreateTransactionResponse> => {
     if (!userId || !books || books.length === 0) {
         throw new Error("Invalid input: userId and books are required.");
     }
@@ -282,7 +287,7 @@ export const createTransaction = async (
  * @author zelebwr
  * @return An object containing total sales amount and total number of transactions.
  */
-export const getTransactionStatistics = async () => {
+export const getTransactionStatistics = async (): Promise<ApiTransactionStatistics> => {
     try {
         const totalTransactions = await prisma.transaction.count();
         const averageResult = await prisma.transaction.aggregate({
@@ -339,8 +344,17 @@ export const getTransactionStatistics = async () => {
 
         if (salesArray.length > 0) {
             salesArray.sort((a, b) => b.count - a.count); // Sort descending by count
-            mostSoldGenre = salesArray[0].name;
-            leastSoldGenre = salesArray[salesArray.length - 1].name;
+
+            const firstGenre = salesArray[0];
+            const lastGenre = salesArray[salesArray.length - 1];
+
+            if (firstGenre) {
+                mostSoldGenre = firstGenre.name;
+            }
+
+            if (lastGenre) {
+                leastSoldGenre = lastGenre.name;
+            }
         }
 
         return {

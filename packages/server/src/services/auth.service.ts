@@ -1,18 +1,21 @@
-import prisma from "../config/prisma";
+import { prisma } from "../config/prisma";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { User } from "@prisma/client";
 import { Prisma } from "@prisma/client";
 
-// Mendefinisikan tipe untuk data input pengguna baru
-type UserInput = Omit<User, "id" | "createdAt" | "updatedAt">;
+import {
+    LoginInput,
+    RegisterInput,
+    RegisterResponse,
+} from "@react-express-library/shared";
 
 /**
  * Mendaftarkan pengguna baru ke database.
  * @param userData Data pengguna (email, password, username).
  * @returns Objek pengguna baru tanpa password.
  */
-export const register = async (userData: UserInput) => {
+export const register = async (userData: RegisterInput): Promise<RegisterResponse> => {
     const { email, password, username } = userData;
 
     if (!email || !password) {
@@ -27,7 +30,7 @@ export const register = async (userData: UserInput) => {
             data: {
                 email,
                 password: hashedPassword,
-                username,
+                username: username ?? null,
             },
             // Pilih hanya data yang aman untuk dikembalikan
             select: {
@@ -62,8 +65,8 @@ export const register = async (userData: UserInput) => {
  * @returns JWT token jika valid, atau null jika tidak.
  */
 export const login = async (
-    credentials: Pick<UserInput, "email" | "password">
-) => {
+    credentials: LoginInput
+): Promise<string> => {
     const { email, password } = credentials;
 
     if (!email || !password) {
@@ -102,6 +105,16 @@ export const login = async (
         return token;
     } catch (error: unknown) {
         console.error("Error during user login:", error);
+
+        if (error instanceof Error && error.message.includes("Invalid")) {
+            throw error;
+        }
+        if (
+            error instanceof Error &&
+            error.message.includes("configuration error")
+        ) {
+            throw error;
+        }
 
         // Generic fallback
         throw new Error("An error occurred during login.");

@@ -1,5 +1,11 @@
 import { Request, Response } from "express";
-import * as genreService from "../services/genre.services";
+import * as genreService from "../services/genre.service";
+
+import {
+    ApiGenreQuery,
+    CreateGenreInput,
+    UpdateGenreInput,
+} from "@react-express-library/shared";
 
 /**
  * * Handler untuk membuat genre baru (POST /genre).
@@ -7,14 +13,14 @@ import * as genreService from "../services/genre.services";
  */
 export const handleCreateGenre = async (req: Request, res: Response) => {
     try {
-        const { name } = req.body;
-        if (!name) {
+        const genreData = req.body as CreateGenreInput;
+        if (!genreData.name) {
             return res.status(400).json({
                 success: false,
                 message: "Genre name is required",
             });
         }
-        const newGenre = await genreService.createGenre(name);
+        const newGenre = await genreService.createGenre(genreData);
         res.status(201).json({
             success: true,
             message: "Genre created successfully",
@@ -50,9 +56,11 @@ export const handleCreateGenre = async (req: Request, res: Response) => {
  */
 export const handleGetAllGenres = async (req: Request, res: Response) => {
     try {
-        const result = await genreService.getAllGenres(req.query);
-        const page = Number(req.query.page) || 1;
-        const limit = Number(req.query.limit) || 10;
+        const query = req.query as ApiGenreQuery;
+        const result = await genreService.getAllGenres(query);
+
+        const page = Number(query.page) || 1;
+        const limit = Number(query.limit) || 10;
 
         res.status(200).json({
             success: true,
@@ -88,6 +96,14 @@ export const handleGetAllGenres = async (req: Request, res: Response) => {
 export const getGenreDetail = async (req: Request, res: Response) => {
     try {
         const { genre_id } = req.params;
+
+        if (!genre_id) {
+            return res.status(400).json({
+                success: false,
+                message: "Genre ID is required",
+            });
+        }
+
         const genre = await genreService.getGenreById(genre_id);
 
         return res.status(200).json({
@@ -133,16 +149,23 @@ export const getGenreDetail = async (req: Request, res: Response) => {
 export const updateGenre = async (req: Request, res: Response) => {
     try {
         const { genre_id } = req.params;
-        const { name } = req.body;
+        if (!genre_id) {
+            return res.status(400).json({
+                success: false,
+                message: "Genre ID is required",
+            });
+        }
 
-        if (!name) {
+        const genreData = req.body as UpdateGenreInput;
+
+        if (!genreData.name) {
             return res.status(400).json({
                 success: false,
                 message: "Genre name is required",
             });
         }
 
-        const updatedGenre = await genreService.updateGenreById(genre_id, name);
+        const updatedGenre = await genreService.updateGenreById(genre_id, genreData);
         return res.status(200).json({
             success: true,
             message: "Genre updated successfully",
@@ -197,6 +220,13 @@ export const deleteGenre = async (req: Request, res: Response) => {
     try {
         const { genre_id } = req.params;
 
+        if (!genre_id) {
+            return res.status(400).json({
+                success: false,
+                message: "Genre ID is required",
+            });
+        }
+
         await genreService.deleteGenreById(genre_id);
         return res.status(200).json({
             success: true,
@@ -224,6 +254,10 @@ export const deleteGenre = async (req: Request, res: Response) => {
                 error.message.includes("still associated with some books")
             ) {
                 statusCode = 400; // 400 Bad Request
+                message = error.message;
+            }
+            else if (error.message.includes("already removed")) {
+                statusCode = 404; // 404 Not Found
                 message = error.message;
             }
         }

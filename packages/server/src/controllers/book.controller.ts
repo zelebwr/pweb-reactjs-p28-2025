@@ -1,12 +1,21 @@
 import { Request, Response } from "express";
 import * as bookService from "../services/book.service";
-import { BookCondition } from "@react-express-library/shared/src/types/book.types"
+
+import {
+    ApiBookQuery,
+    BookCondition,
+    CreateBookInput,
+    UpdateBookInput,
+} from "@react-express-library/shared";
+
 /**
  * Handler untuk membuat buku baru (POST /books)
  */
 export const handleCreateBook = async (req: Request, res: Response) => {
     try {
-        // --- PENAMBAHAN VALIDASI ---
+
+        const bookData = req.body as CreateBookInput;
+        
         const {
             title,
             writer,
@@ -16,7 +25,8 @@ export const handleCreateBook = async (req: Request, res: Response) => {
             stockQuantity,
             genreId,
             condition,
-        } = req.body;
+        } = bookData;
+
         if (
             !title ||
             !writer ||
@@ -32,15 +42,17 @@ export const handleCreateBook = async (req: Request, res: Response) => {
                     "Missing required fields: title, writer, publisher, publicationYear, price, stockQuantity, genreId are all required.",
             });
         }
-        
+
         if (condition && !Object.values(BookCondition).includes(condition)) {
             return res.status(400).json({
                 success: false,
-                message: `Invalid book condition. Accepted values are: ${Object.values(BookCondition).join(", ")}.`,
+                message: `Invalid book condition. Accepted values are: ${Object.values(
+                    BookCondition
+                ).join(", ")}.`,
             });
         }
 
-        const newBook = await bookService.createBook(req.body);
+        const newBook = await bookService.createBook(bookData);
         res.status(201).json({
             success: true,
             message: "Book added successfully",
@@ -140,7 +152,7 @@ export const handleUpdateBook = async (req: Request, res: Response) => {
             });
         }
         // Map snake_case to camelCase for the service
-        const updateData = {
+        const updateData: UpdateBookInput = {
             description: req.body.description,
             price: req.body.price,
             stockQuantity: req.body.stockQuantity ?? req.body.stock_quantity, // Use nullish coalescing
@@ -153,6 +165,13 @@ export const handleUpdateBook = async (req: Request, res: Response) => {
                 delete updateData[typedKey];
             }
         });
+
+        if (!book_id) {
+            return res.status(400).json({
+                success: false,
+                message: "Book ID is required in the URL parameter.",
+            });
+        }
 
         const updatedBook = await bookService.updateBook(book_id, updateData);
         res.status(200).json({
@@ -203,6 +222,12 @@ export const handleUpdateBook = async (req: Request, res: Response) => {
 export const handleGetBookById = async (req: Request, res: Response) => {
     try {
         const { book_id } = req.params;
+        if (!book_id) {
+            return res.status(400).json({
+                success: false,
+                message: "Book ID is required in the URL parameter.",
+            });
+        }
         const book = await bookService.getBookById(book_id);
 
         res.status(200).json({
@@ -248,10 +273,19 @@ export const handleGetBooksByGenre = async (req: Request, res: Response) => {
     try {
         const { genre_id } = req.params;
         // Menyerahkan keseluruhan query pada service untuk penanganan pagination, filter, dan sorting
-        const result = await bookService.getBooksByGenreId(genre_id, req.query);
+        const query = req.query as ApiBookQuery;
 
-        const page = Number(req.query.page) || 1;
-        const limit = Number(req.query.limit) || 10;
+        if (!genre_id) {
+            return res.status(400).json({
+                success: false,
+                message: "Genre ID is required in the URL parameter.",
+            });
+        }
+
+        const result = await bookService.getBooksByGenreId(genre_id, query);
+
+        const page = Number(query.page) || 1;
+        const limit = Number(query.limit) || 10;
 
         res.status(200).json({
             success: true,
@@ -306,6 +340,14 @@ export const handleGetBooksByGenre = async (req: Request, res: Response) => {
 export const handleDeleteBook = async (req: Request, res: Response) => {
     try {
         const { book_id } = req.params;
+
+        if (!book_id) {
+            return res.status(400).json({
+                success: false,
+                message: "Book ID is required in the URL parameter.",
+            });
+        }
+
         await bookService.deleteBookById(book_id);
         res.status(200).json({
             success: true,
@@ -347,9 +389,11 @@ export const handleDeleteBook = async (req: Request, res: Response) => {
  */
 export const handleGetAllBooks = async (req: Request, res: Response) => {
     try {
-        const result = await bookService.getAllBooks(req.query);
-        const page = Number(req.query.page) || 1;
-        const limit = Number(req.query.limit) || 10;
+        const query = req.query as ApiBookQuery;
+        const result = await bookService.getAllBooks(query);
+
+        const page = Number(query.page) || 1;
+        const limit = Number(query.limit) || 10;
 
         res.status(200).json({
             success: true,

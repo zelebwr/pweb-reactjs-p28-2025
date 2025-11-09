@@ -1,23 +1,22 @@
-import prisma from "../config/prisma";
-import { Book } from "@prisma/client";
+import { prisma } from "../config/prisma";
 import { Prisma } from "@prisma/client";
-import { BookCondition, CreateBookInput, UpdateBookInput } from '@react-express-library/shared/src/types/book.types';
 
-// Tipe data untuk input saat membuat buku baru
-type CreateBookInput = Omit<
-    Book,
-    "id" | "createdAt" | "updatedAt" | "deletedAt"
->;
-// Tipe data untuk input saat mengupdate buku (hanya kolom tertentu)
-type UpdateBookInput = Partial<
-    Pick<Book, "description" | "price" | "stockQuantity">
->;
+import {
+    ApiBook,
+    ApiBookCreateResponse,
+    ApiBookListResponse,
+    ApiBookQuery,
+    ApiBookUpdateResponse,
+    BookCondition,
+    CreateBookInput,
+    UpdateBookInput,
+} from "@react-express-library/shared";
 
 /**
  * Membuat buku baru.
  * @param bookData Data untuk buku baru.
  */
-export const createBook = async (bookData: CreateBookInput) => {
+export const createBook = async (bookData: CreateBookInput): Promise<ApiBookCreateResponse> => {
     if (
         !bookData.title ||
         !bookData.genreId ||
@@ -51,6 +50,7 @@ export const createBook = async (bookData: CreateBookInput) => {
                 publicationYear: Number(rest.publicationYear), // Ensure numeric types
                 price: Number(rest.price),
                 stockQuantity: Number(rest.stockQuantity),
+                condition: bookData.condition,
                 genre: {
                     connect: {
                         id: genreId,
@@ -92,7 +92,7 @@ export const createBook = async (bookData: CreateBookInput) => {
  * Mengambil detail satu buku berdasarkan ID.
  * @param bookId ID dari buku yang akan dicari.
  */
-export const getBookById = async (bookId: string) => {
+export const getBookById = async (bookId: string): Promise<ApiBook> => {
     try {
         const book = await prisma.book.findUnique({
             where: {
@@ -121,7 +121,7 @@ export const getBookById = async (bookId: string) => {
         }
 
         const { genre, ...bookData } = book;
-        return { ...bookData, genre: genre?.name };
+        return { ...bookData, genre: genre?.name ?? '' };
     } catch (error: unknown) {
         console.error(`Error retrieving book by ID ${bookId}:`, error);
         if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -141,7 +141,7 @@ export const getBookById = async (bookId: string) => {
  * @param bookId ID dari buku yang akan diupdate.
  * @param bookData Data baru untuk buku.
  */
-export const updateBook = async (bookId: string, bookData: UpdateBookInput) => {
+export const updateBook = async (bookId: string, bookData: UpdateBookInput): Promise<ApiBookUpdateResponse> => {
     // Validasi: Pastikan setidaknya satu kolom di-update
     if (
         Object.keys(bookData).length === 0 ||
@@ -155,11 +155,6 @@ export const updateBook = async (bookId: string, bookData: UpdateBookInput) => {
     }
 
     try {
-        const dataToUpdate: Prisma.BookUpdateInput = {};
-        dataToUpdate.description = bookData.description;
-        dataToUpdate.price = Number(bookData.price);
-        dataToUpdate.stockQuantity = Number(bookData.stockQuantity);
-
         // Check if book exists before updating
         const existingBook = await prisma.book.findUnique({
             where: { id: bookId, deletedAt: null },
@@ -171,7 +166,7 @@ export const updateBook = async (bookId: string, bookData: UpdateBookInput) => {
 
         const updatedBook = await prisma.book.update({
             where: { id: bookId },
-            data: dataToUpdate,
+            data: bookData,
             select: {
                 id: true,
                 title: true,
@@ -213,7 +208,7 @@ export const updateBook = async (bookId: string, bookData: UpdateBookInput) => {
  * @param page Halaman saat ini.
  * @param limit Jumlah data per halaman.
  */
-export const getBooksByGenreId = async (genreId: string, query: any) => {
+export const getBooksByGenreId = async (genreId: string, query: ApiBookQuery): Promise<ApiBookListResponse> => {
     try {
         const genreExists = await prisma.genre.findUnique({
             where: { id: genreId, deletedAt: null },
@@ -268,6 +263,7 @@ export const getBooksByGenreId = async (genreId: string, query: any) => {
                 description: true,
                 price: true,
                 stockQuantity: true,
+                condition: true,
                 genre: { select: { name: true } }, // Keep genre name
             },
         });
@@ -297,7 +293,7 @@ export const getBooksByGenreId = async (genreId: string, query: any) => {
  * Menghapus buku (soft delete) dengan mengisi kolom 'deletedAt'.
  * @param bookId ID dari buku yang akan dihapus.
  */
-export const deleteBookById = async (bookId: string) => {
+export const deleteBookById = async (bookId: string): Promise<void> => {
     try {
         const result = await prisma.book.updateMany({
             where: {
@@ -341,7 +337,7 @@ export const deleteBookById = async (bookId: string) => {
  * Mengambil semua buku dengan filter dan pagination.
  * @param query Parameter query dari request (page, limit, search, orderByTitle).
  */
-export const getAllBooks = async (query: any) => {
+export const getAllBooks = async (query: ApiBookQuery): Promise<ApiBookListResponse> => {
     try {
         const {
             page = 1,
@@ -388,6 +384,7 @@ export const getAllBooks = async (query: any) => {
                 description: true,
                 price: true,
                 stockQuantity: true,
+                condition: true,
                 genre: { select: { name: true } },
             },
         });
@@ -397,7 +394,7 @@ export const getAllBooks = async (query: any) => {
         // Map genre name like in getBookById
         const formattedBooks = books.map((book) => {
             const { genre, ...bookData } = book;
-            return { ...bookData, genre: genre?.name };
+            return { ...bookData, genre: genre?.name ?? ''};
         });
 
         return { books: formattedBooks, total: totalBooks };

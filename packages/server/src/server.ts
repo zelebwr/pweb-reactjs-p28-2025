@@ -1,12 +1,15 @@
 import express, { Application, Request, Response } from "express";
 import dotenv from "dotenv";
-import prisma from "./config/prisma";
-import mainRouter from "./routes/index";
+import { prisma } from "./config/prisma";
+import mainRouter from "./api/index";
+import cors from "cors";
 
 dotenv.config();
 
 const app: Application = express();
 const PORT = process.env.PORT || 4000;
+
+app.use(cors());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -34,7 +37,7 @@ app.get("/health-check", (req: Request, res: Response) => {
     }
 });
 
-app.use("/", mainRouter);
+app.use("/api", mainRouter);
 
 const startServer = async () => {
     try {

@@ -1,5 +1,14 @@
-import prisma from "../config/prisma";
+import { prisma } from "../config/prisma";
 import { Prisma } from "@prisma/client";
+
+import {
+    ApiGenre,
+    ApiGenreDetail,
+    ApiGenreListResponse,
+    ApiGenreQuery,
+    CreateGenreInput,
+    UpdateGenreInput,
+} from "@react-express-library/shared";
 
 /**
  * * Retrieve a single genre by its unique ID.
@@ -7,13 +16,17 @@ import { Prisma } from "@prisma/client";
  * @param id The UUID of the genre to retrieve.
  * @return The genre object or null if not found.
  */
-export const getGenreById = async (id: string) => {
+export const getGenreById = async (id: string): Promise<ApiGenreDetail> => {
     try {
         // Use Prisma to find unique genre by ID
         const genre = await prisma.genre.findUnique({
             where: {
                 id: id,
+                deletedAt: null, // Ensure we only get non-deleted genres
             },
+            omit: {
+                deletedAt: true,
+            }
         });
 
         if (!genre) {
@@ -46,15 +59,17 @@ export const getGenreById = async (id: string) => {
  * @param name The new name for the genre.
  * @returns The updated genre object.
  */
-export const updateGenreById = async (id: string, name: string) => {
+export const updateGenreById = async (id: string, data: UpdateGenreInput): Promise<ApiGenreDetail> => {
     try {
         const updatedGenre = await prisma.genre.update({
             where: {
                 id: id,
+                deletedAt: null, // Only update if not deleted
             },
-            data: {
-                name: name,
-            },
+            data: data, 
+            omit: {
+                deletedAt: true,
+            }
         });
         return updatedGenre;
     } catch (error: unknown) {
@@ -82,9 +97,9 @@ export const updateGenreById = async (id: string, name: string) => {
  * @param id The UUID of the genre to delete.
  * @return The deleted genre object.
  */
-export const deleteGenreById = async (id: string) => {
+export const deleteGenreById = async (id: string): Promise<void> => {
     try {
-        const deletedGenre = await prisma.genre.updateMany({
+        const result = await prisma.genre.updateMany({
             where: {
                 id: id,
                 deletedAt: null, // Only delete if not already deleted
@@ -93,7 +108,9 @@ export const deleteGenreById = async (id: string) => {
                 deletedAt: new Date(),
             },
         });
-        return deletedGenre;
+        if (result.count === 0) {
+            throw new Error("Genre not found or already removed");
+        }
     } catch (error: unknown) {
         console.error("Error deleting genre:", error);
 
@@ -109,7 +126,10 @@ export const deleteGenreById = async (id: string) => {
             if (error.code === "P2023") {
                 throw new Error("Invalid genre ID format.");
             }
-            2;
+        }
+
+        if (error instanceof Error && error.message === "Genre not found or already removed") {
+            throw error;
         }
 
         throw new Error("Database error while deleting genre.");
@@ -120,11 +140,12 @@ export const deleteGenreById = async (id: string) => {
  * * Membuat genre baru di database.
  * @author HikariReiziq (diadaptasi dari Gemini)
  */
-export const createGenre = async (name: string) => {
+export const createGenre = async (data: CreateGenreInput): Promise<ApiGenreDetail> => {
     try {
         const newGenre = await prisma.genre.create({
-            data: {
-                name,
+            data: data,
+            omit: {
+                deletedAt: true,
             },
         });
         return newGenre;
@@ -145,7 +166,7 @@ export const createGenre = async (name: string) => {
  * * Mengambil semua genre dengan filter dan pagination.
  * @author HikariReiziq (diadaptasi dari Gemini)
  */
-export const getAllGenres = async (query: any) => {
+export const getAllGenres = async (query: ApiGenreQuery): Promise<ApiGenreListResponse> => {
     try {
         const { page = 1, limit = 10, search, orderByName } = query;
         const skip = (Number(page) - 1) * Number(limit);

@@ -4,18 +4,13 @@ import jwt, {
     JsonWebTokenError,
     TokenExpiredError,
 } from "jsonwebtoken";
-import prisma from "../config/prisma";
+import { prisma } from "../config/prisma";
 import { Prisma } from "@prisma/client";
-
-interface AuthenticatedUser {
-    id: string;
-    email: string;
-    username: string | null; // Prisma schema shows username is optional
-}
+import { PublicUser } from "@react-express-library/shared";
 
 // Membuat interface custom agar TypeScript tahu bahwa 'req' bisa memiliki properti 'user'
 export interface AuthRequest extends Request {
-    user?: AuthenticatedUser;
+    user?: PublicUser;
 }
 
 interface TokenPayload extends JwtPayload {
@@ -43,6 +38,13 @@ export const authMiddleware = async (
 
     const token = authHeader.split(" ")[1];
 
+    if (!token) {
+        return res.status(401).json({
+            success: false,
+            message: "Unauthorized: Token not provided",
+        });
+    }
+
     const jwtSecret = process.env.JWT_SECRET;
     if (!jwtSecret) {
         console.error("CRITICAL: JWT_SECRET environment variable is not set!");
@@ -55,14 +57,18 @@ export const authMiddleware = async (
 
     try {
         // Verifikasi token menggunakan kunci rahasia
-        const decoded = jwt.verify(token, jwtSecret) as TokenPayload;
+        const decoded = jwt.verify(token, jwtSecret);
 
-        if (!decoded.id || !decoded.email) {
+        if (
+            typeof decoded !== "object" || // <-- Was '==='
+            !("id" in decoded) ||
+            !("email" in decoded)
+        ) {
             throw new Error("Invalid token payload");
         }
 
         // Cari pengguna di database berdasarkan ID dari token
-        const user = await prisma.user.findUnique({
+        const user: PublicUser | null = await prisma.user.findUnique({
             where: { id: decoded.id },
             select: { id: true, email: true, username: true }, // Hanya ambil data yang aman
         });
