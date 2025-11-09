@@ -6,6 +6,11 @@ import {
     CreateTransactionInput,
 } from "@react-express-library/shared";
 
+import {
+    validateTransactionData,
+    validatePagination,
+} from "../utils/validation";
+
 import { AuthRequest } from "../middlewares/auth.middleware";
 
 /**
@@ -15,6 +20,13 @@ import { AuthRequest } from "../middlewares/auth.middleware";
 export const getAllTransactions = async (req: Request, res: Response) => {
     try {
         const query = req.query as ApiTransactionQuery;
+        const paginationError = validatePagination(query.page, query.limit);
+        if (paginationError) {
+            return res
+                .status(400)
+                .json({ success: false, message: paginationError });
+        }
+
         const result = await transactionService.getAllTransactions(query);
 
         const page = Number(query.page) || 1;
@@ -124,6 +136,17 @@ export const createTransaction = async (req: AuthRequest, res: Response) => {
             return res.status(400).json({
                 message:
                     "Request body must include a non-empty array of books.",
+            });
+        }
+
+        const transactionData = req.body as CreateTransactionInput;
+
+        const validationErrors = validateTransactionData(transactionData);
+        if (validationErrors) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid transaction data.",
+                errors: validationErrors,
             });
         }
 

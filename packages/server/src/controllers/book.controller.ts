@@ -8,6 +8,12 @@ import {
     UpdateBookInput,
 } from "@react-express-library/shared";
 
+import {
+    validateBookData,
+    validateBookUpdateData,
+    validatePagination,
+} from "../utils/validation";
+
 /**
  * Handler untuk membuat buku baru (POST /books)
  */
@@ -15,6 +21,15 @@ export const handleCreateBook = async (req: Request, res: Response) => {
     try {
 
         const bookData = req.body as CreateBookInput;
+
+        const validationErrors = validateBookData(bookData);
+        if (validationErrors) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid book data.",
+                errors: validationErrors,
+            });
+        }
         
         const {
             title,
@@ -166,6 +181,15 @@ export const handleUpdateBook = async (req: Request, res: Response) => {
             }
         });
 
+        const validationErrors = validateBookUpdateData(updateData);
+        if (validationErrors) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid book data.",
+                errors: validationErrors,
+            });
+        }
+
         if (!book_id) {
             return res.status(400).json({
                 success: false,
@@ -274,6 +298,13 @@ export const handleGetBooksByGenre = async (req: Request, res: Response) => {
         const { genre_id } = req.params;
         // Menyerahkan keseluruhan query pada service untuk penanganan pagination, filter, dan sorting
         const query = req.query as ApiBookQuery;
+
+        const paginationError = validatePagination(query.page, query.limit);
+        if (paginationError) {
+            return res
+                .status(400)
+                .json({ success: false, message: paginationError });
+        }
 
         if (!genre_id) {
             return res.status(400).json({
@@ -390,6 +421,14 @@ export const handleDeleteBook = async (req: Request, res: Response) => {
 export const handleGetAllBooks = async (req: Request, res: Response) => {
     try {
         const query = req.query as ApiBookQuery;
+
+        const paginationError = validatePagination(query.page, query.limit);
+        if (paginationError) {
+            return res
+                .status(400)
+                .json({ success: false, message: paginationError });
+        }
+
         const result = await bookService.getAllBooks(query);
 
         const page = Number(query.page) || 1;
