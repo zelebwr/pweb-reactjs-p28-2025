@@ -5,21 +5,42 @@ import { Button, Input } from '../../../components';
 import { LibraryLogo } from '../../../components/Logo/LibraryLogo';
 import { useAuth } from '../hooks/useAuth';
 
-export const LoginForm = () => {
+export const RegisterForm = () => {
   const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [errors, setErrors] = useState<{
+    email?: string;
+    username?: string;
+    password?: string;
+    confirmPassword?: string;
+  }>({});
   
-  const { login, isLoading, error: apiError } = useAuth();
+  const { register, isLoading, error: apiError } = useAuth();
 
   const validateForm = (): boolean => {
-    const newErrors: { email?: string; password?: string } = {};
+    const newErrors: {
+      email?: string;
+      username?: string;
+      password?: string;
+      confirmPassword?: string;
+    } = {};
 
     // Email validation
     if (!email) {
       newErrors.email = 'Email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = 'Email must contain @ and valid domain';
+      newErrors.email = 'Email must contain @ and valid domain (e.g., .com, .id, .ac.id)';
+    }
+
+    // Username validation (optional but if provided must be valid)
+    if (username) {
+      if (username.length < 3) {
+        newErrors.username = 'Username must be at least 3 characters';
+      } else if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+        newErrors.username = 'Username can only contain letters, numbers, underscore, and hyphen';
+      }
     }
 
     // Password validation
@@ -27,6 +48,13 @@ export const LoginForm = () => {
       newErrors.password = 'Password is required';
     } else if (password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
+    }
+
+    // Confirm password validation
+    if (!confirmPassword) {
+      newErrors.confirmPassword = 'Please confirm your password';
+    } else if (password !== confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
     }
 
     setErrors(newErrors);
@@ -40,7 +68,11 @@ export const LoginForm = () => {
       return;
     }
 
-    await login({ email, password });
+    await register({
+      email,
+      password,
+      username: username || undefined,
+    });
   };
 
   return (
@@ -53,8 +85,8 @@ export const LoginForm = () => {
         
         {/* Header */}
         <div className="text-center">
-          <h2 className="text-4xl font-bold text-dark-blue">Welcome Back!</h2>
-          <p className="mt-2 text-gray-600">Sign in to your account</p>
+          <h2 className="text-4xl font-bold text-dark-blue">Create Account</h2>
+          <p className="mt-2 text-gray-600">Join our library community</p>
         </div>
 
         {/* Form Card */}
@@ -78,6 +110,17 @@ export const LoginForm = () => {
               required
             />
 
+            {/* Username Input */}
+            <Input
+              label="Username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              error={errors.username}
+              placeholder="johndoe"
+              helperText="Optional - minimum 3 characters"
+            />
+
             {/* Password Input */}
             <Input
               label="Password"
@@ -85,6 +128,18 @@ export const LoginForm = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               error={errors.password}
+              placeholder="••••••••"
+              helperText="Minimum 6 characters"
+              required
+            />
+
+            {/* Confirm Password Input */}
+            <Input
+              label="Confirm Password"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              error={errors.confirmPassword}
               placeholder="••••••••"
               required
             />
@@ -97,7 +152,7 @@ export const LoginForm = () => {
               fullWidth
               isLoading={isLoading}
             >
-              Sign In
+              Create Account
             </Button>
           </form>
 
@@ -108,18 +163,18 @@ export const LoginForm = () => {
                 <div className="w-full border-t border-gray-300"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Don't have an account?</span>
+                <span className="px-2 bg-white text-gray-500">Already have an account?</span>
               </div>
             </div>
           </div>
 
-          {/* Register Link */}
+          {/* Login Link */}
           <div className="mt-6 text-center">
             <Link
-              to="/register"
+              to="/login"
               className="text-dark-blue hover:text-medium-blue font-medium transition-colors"
             >
-              Create a new account
+              Sign in to your account
             </Link>
           </div>
         </div>
