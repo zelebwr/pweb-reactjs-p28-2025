@@ -1,8 +1,8 @@
-# Full-Stack Monorepo Project
+## Full-Stack Monorepo Project
 
 This repository contains the full-stack code for our project, managed as a `pnpm` workspace.
 
-## 📦 Monorepo Structure
+### 📦 Monorepo Structure
 
 - `/package.json`: The root "manager" for the whole workspace.
 - `/packages/client`: The React + Vite frontend.
@@ -11,18 +11,18 @@ This repository contains the full-stack code for our project, managed as a `pnpm
 
 ---
 
-## 🚀 Getting Started
+### 🚀 Getting Started
 
 Follow these steps _in order_ to get your local environment set up correctly.
 
-### 1. Prerequisites
+#### 1. Prerequisites
 
 - [Node.js](https://nodejs.org/) (v18 or higher recommended)
 - [Git](https://git-scm.com/)
 
 This project uses `pnpm` to manage dependencies. We enforce a specific version using `corepack`.
 
-### 2. Local Setup
+#### 2. Local Setup
 
 1.  **Clone the Repository**
 
@@ -60,7 +60,7 @@ This project uses `pnpm` to manage dependencies. We enforce a specific version u
 
 ---
 
-## 💻 Development
+### 💻 Development
 
 **All `pnpm` commands should be run from the root of the repository.**
 
@@ -69,3 +69,11 @@ This project uses `pnpm` to manage dependencies. We enforce a specific version u
 | **`pnpm dev`**    | **(Default)** Runs both the client and server at the same time. |
 | `pnpm dev:client` | Runs _only_ the frontend (Vite).                                |
 | `pnpm dev:server` | Runs _only_ the backend (Express).                              |
+
+## 📷 Documentation
+
+### 🔒 Authentication
+
+### 📚 Book Management
+
+### 📃 Transaction
