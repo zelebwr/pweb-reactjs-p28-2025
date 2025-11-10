@@ -1,7 +1,15 @@
+// App.tsx - Integrated with Transaction System
+
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { LoginPage, RegisterPage } from './features/auth';
 import { BooksPage } from './pages/BooksPage';
 import { ProtectedRoute } from './components';
+
+// Import Transaction Pages
+import { Checkout } from './pages/Checkout';
+import { Transactions } from './pages/Transaction';
+import { TransactionDetail } from './pages/TransactionDetail';
+
 
 function App() {
   return (
@@ -14,12 +22,40 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         
-        {/* Protected routes */}
+        {/* Protected routes - Books */}
         <Route
           path="/books"
           element={
             <ProtectedRoute>
               <BooksPage />
+            </ProtectedRoute>
+          }
+        />
+        
+        {/* Protected routes - Transactions */}
+        <Route
+          path="/checkout"
+          element={
+            <ProtectedRoute>
+              <Checkout />
+            </ProtectedRoute>
+          }
+        />
+        
+        <Route
+          path="/transactions"
+          element={
+            <ProtectedRoute>
+              <Transactions />
+            </ProtectedRoute>
+          }
+        />
+        
+        <Route
+          path="/transactions/:id"
+          element={
+            <ProtectedRoute>
+              <TransactionDetail />
             </ProtectedRoute>
           }
         />

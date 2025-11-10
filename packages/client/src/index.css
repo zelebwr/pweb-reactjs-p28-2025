@@ -1,6 +1,9 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@theme {
+/* CSS variables (kept from original file) */
+:root {
   --color-cream: #F6F4EB;
   --color-sky-blue: #91C8E4;
   --color-medium-blue: #749BC2;
