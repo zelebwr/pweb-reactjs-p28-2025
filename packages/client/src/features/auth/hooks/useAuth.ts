@@ -30,12 +30,14 @@ export const useAuth = () => {
       const user = await authApi.getCurrentUser();
       setAuthState({ user, isLoading: false, error: null });
       
-      // Redirect to books list
-      navigate('/books');
+      // Delay navigation to show success toast
+      setTimeout(() => {
+        navigate('/books');
+      }, 1500);
       
       return { success: true };
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Login failed. Please try again.';
+      const errorMessage = error.response?.data?.message || 'Invalid email or password';
       setAuthState(prev => ({ ...prev, isLoading: false, error: errorMessage }));
       return { success: false, error: errorMessage };
     }

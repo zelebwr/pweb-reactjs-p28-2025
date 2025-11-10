@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { Button, Input } from '../../../components';
+import { Button, Input, Toast, type ToastType } from '../../../components';
 import { LibraryLogo } from '../../../components/Logo/LibraryLogo';
 import { useAuth } from '../hooks/useAuth';
 
@@ -16,8 +16,9 @@ export const RegisterForm = () => {
     password?: string;
     confirmPassword?: string;
   }>({});
+  const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
   
-  const { register, isLoading, error: apiError } = useAuth();
+  const { register, isLoading } = useAuth();
 
   const validateForm = (): boolean => {
     const newErrors: {
@@ -68,15 +69,31 @@ export const RegisterForm = () => {
       return;
     }
 
-    await register({
+    const result = await register({
       email,
       password,
       username: username || undefined,
     });
+
+    if (result.success) {
+      setToast({ message: 'Account created! Logging you in...', type: 'success' });
+      // Navigation will happen automatically after login
+    } else {
+      setToast({ message: result.error || 'Registration failed. Please try again.', type: 'error' });
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12">
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+          duration={3000}
+        />
+      )}
       <div className="max-w-md w-full space-y-8">
         {/* Logo */}
         <div className="flex justify-center mb-8">
@@ -92,13 +109,6 @@ export const RegisterForm = () => {
         {/* Form Card */}
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* API Error Alert */}
-            {apiError && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                <p className="text-sm">{apiError}</p>
-              </div>
-            )}
-
             {/* Email Input */}
             <Input
               label="Email Address"
