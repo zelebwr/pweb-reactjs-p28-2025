@@ -6,3 +6,4 @@ export { LibraryLogo } from './Logo/LibraryLogo';
 export { ProtectedRoute } from './ProtectedRoute';
 export { MainLayout } from './Layout/MainLayout';
 export { Navbar } from './Layout/Navbar';
+export { Toast, type ToastType } from './Toast/Toast';

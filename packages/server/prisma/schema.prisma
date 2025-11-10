@@ -34,6 +34,7 @@ model Book {
   publisher       String
   publicationYear Int
   description     String?
+  coverImage      String? // Optional cover image URL
   price           Float
   stockQuantity   Int
 

@@ -49,6 +49,7 @@ export interface ApiBook {
     publisher: string;
     publicationYear: number;
     description: string | null;
+    coverImage: string | null;
     price: number;
     stockQuantity: number;
     condition: BookCondition;
