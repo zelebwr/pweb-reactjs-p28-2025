@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities; */
 
-@import "tailwindcss"; 
-@theme {
 /* CSS variables (kept from original file) */
 :root {
   --color-cream: #F6F4EB;
@@ -18,4 +16,5 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-};
+
+@import "tailwindcss"; 
