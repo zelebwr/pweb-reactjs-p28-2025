@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card } from '../../../components';
+import { Card, Button, Toast, type ToastType } from '../../../components';
+import { useCart } from '../../cart/hooks/useCart';
 import type { ApiBook } from '@react-express-library/shared';
 
 interface BookCardProps {
@@ -20,6 +22,8 @@ const conditionLabels = {
 
 export const BookCard = ({ book }: BookCardProps) => {
   const navigate = useNavigate();
+  const { addToCart, isInCart } = useCart();
+  const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -27,6 +31,22 @@ export const BookCard = ({ book }: BookCardProps) => {
       currency: 'IDR',
       minimumFractionDigits: 0,
     }).format(price);
+  };
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent navigate to detail page
+    
+    if (book.stockQuantity === 0) {
+      setToast({ message: 'Book is out of stock', type: 'error' });
+      return;
+    }
+
+    try {
+      addToCart(book, 1);
+      setToast({ message: `Added "${book.title}" to cart`, type: 'success' });
+    } catch (error: any) {
+      setToast({ message: error.message || 'Failed to add to cart', type: 'error' });
+    }
   };
 
   return (
@@ -114,7 +134,33 @@ export const BookCard = ({ book }: BookCardProps) => {
             </p>
           </div>
         </div>
+
+        {/* Add to Cart Button */}
+        <div className="mt-4">
+          <Button
+            variant={isInCart(book.id) ? "secondary" : "primary"}
+            onClick={handleAddToCart}
+            disabled={book.stockQuantity === 0}
+            className="w-full"
+          >
+            {book.stockQuantity === 0 
+              ? '❌ Out of Stock' 
+              : isInCart(book.id)
+              ? '✓ In Cart'
+              : '🛒 Add to Cart'}
+          </Button>
+        </div>
       </div>
+
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+          duration={2000}
+        />
+      )}
     </Card>
   );
 };

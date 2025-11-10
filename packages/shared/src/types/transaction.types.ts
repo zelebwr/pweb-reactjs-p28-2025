@@ -4,6 +4,27 @@
 import { PublicUser } from "./user.types";
 
 // ----------------------------------------------------------------
+// --- Enums (Shared between Frontend and Backend) ---
+// ----------------------------------------------------------------
+
+export enum TransactionStatus {
+    PENDING = "PENDING",
+    PAID = "PAID",
+    SENDING = "SENDING",
+    COMPLETED = "COMPLETED",
+    CANCELED = "CANCELED",
+}
+
+export enum PaymentMethod {
+    GOPAY = "GOPAY",
+    SHOPEEPAY = "SHOPEEPAY",
+    BCA = "BCA",
+    MANDIRI = "MANDIRI",
+    BNI = "BNI",
+    COD = "COD",
+}
+
+// ----------------------------------------------------------------
 // --- Frontend -> Server (Data Sent TO the Backend) ---
 // ----------------------------------------------------------------
 
@@ -27,6 +48,10 @@ export interface BookOrderItem {
  */
 export interface CreateTransactionInput {
     books: BookOrderItem[];
+    shippingAddress: string;
+    phoneNumber: string;
+    paymentMethod: PaymentMethod;
+    bankAccount?: string; // Only for bank transfer
 }
 
 /**
@@ -37,9 +62,11 @@ export interface ApiTransactionQuery {
     page?: string;
     limit?: string;
     search?: string;
+    status?: TransactionStatus;
     orderById?: "asc" | "desc";
     orderByAmount?: "asc" | "desc";
     orderByPrice?: "asc" | "desc";
+    orderByDate?: "asc" | "desc";
 }
 
 // ----------------------------------------------------------------
@@ -79,6 +106,7 @@ export interface ApiTransaction {
     id: string;
     totalPrice: number;
     totalAmount: number;
+    status: TransactionStatus;
     createdAt: Date; // Your service returns a Date object
     user: PublicUser;
     books: ApiTransactionBookItem[];
@@ -117,6 +145,11 @@ export interface ApiTransactionDetail {
     id: string;
     totalPrice: number;
     totalAmount: number;
+    status: TransactionStatus;
+    shippingAddress: string;
+    phoneNumber: string;
+    paymentMethod: PaymentMethod;
+    bankAccount?: string | null;
     createdAt: Date; // Your service returns a Date object
     user: PublicUser;
     books: ApiTransactionDetailBookItem[];

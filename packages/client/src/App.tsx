@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { LoginPage, RegisterPage } from './features/auth';
+import { CartPage } from './features/cart';
+import { TransactionsPage, TransactionDetailPage } from './features/transactions';
 import { BooksPage, AddBookPage, BookDetailPage, EditBookPage } from './pages';
 import { ProtectedRoute } from './components';
 
@@ -44,6 +46,30 @@ function App() {
           element={
             <ProtectedRoute>
               <EditBookPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/cart"
+          element={
+            <ProtectedRoute>
+              <CartPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/transactions"
+          element={
+            <ProtectedRoute>
+              <TransactionsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/transactions/:id"
+          element={
+            <ProtectedRoute>
+              <TransactionDetailPage />
             </ProtectedRoute>
           }
         />

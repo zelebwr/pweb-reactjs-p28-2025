@@ -3,12 +3,15 @@ import { useState, useEffect } from 'react';
 import { LibraryLogo } from '../Logo/LibraryLogo';
 import { getCurrentUser } from '../../features/auth/api/authApi';
 import { logout as logoutApi } from '../../features/auth/api/authApi';
+import { useCart } from '../../features/cart/hooks/useCart';
 import type { PublicUser } from '@react-express-library/shared';
 
 export const Navbar = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<PublicUser | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { getTotalItems } = useCart();
+  const cartItemsCount = getTotalItems();
 
   useEffect(() => {
     const loadUser = async () => {
@@ -52,6 +55,22 @@ export const Navbar = () => {
             >
               Books
             </Link>
+            
+            {/* Cart with Badge */}
+            <Link
+              to="/cart"
+              className="relative text-gray-700 hover:text-dark-blue font-medium transition-colors"
+            >
+              <span className="flex items-center gap-2">
+                🛒 Cart
+                {cartItemsCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                    {cartItemsCount}
+                  </span>
+                )}
+              </span>
+            </Link>
+            
             <Link
               to="/transactions"
               className="text-gray-700 hover:text-dark-blue font-medium transition-colors"
@@ -116,6 +135,18 @@ export const Navbar = () => {
                 className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 Books
+              </Link>
+              <Link
+                to="/cart"
+                onClick={() => setIsMenuOpen(false)}
+                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors flex items-center justify-between"
+              >
+                <span>🛒 Cart</span>
+                {cartItemsCount > 0 && (
+                  <span className="bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                    {cartItemsCount}
+                  </span>
+                )}
               </Link>
               <Link
                 to="/transactions"
