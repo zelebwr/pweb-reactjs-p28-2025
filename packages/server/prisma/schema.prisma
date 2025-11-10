@@ -13,6 +13,23 @@ enum BookCondition {
   USED
 }
 
+enum TransactionStatus {
+  PENDING
+  PAID
+  SENDING
+  COMPLETED
+  CANCELED
+}
+
+enum PaymentMethod {
+  GOPAY
+  SHOPEEPAY
+  BCA
+  MANDIRI
+  BNI
+  COD
+}
+
 model User {
   id        String   @id @default(uuid())
   username  String?
@@ -75,6 +92,13 @@ model Transaction {
 
   totalPrice  Float   @default(0)
   totalAmount Int     @default(0)
+
+  // Shipping & Payment Information
+  status          TransactionStatus @default(PENDING)
+  shippingAddress String
+  phoneNumber     String
+  paymentMethod   PaymentMethod
+  bankAccount     String? // Only for bank transfer
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

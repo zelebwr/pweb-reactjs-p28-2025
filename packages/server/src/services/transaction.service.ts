@@ -23,9 +23,11 @@ export const getAllTransactions = async (query: ApiTransactionQuery): Promise<Ap
             page = 1,
             limit = 10,
             search,
+            status,
             orderById,
             orderByAmount,
             orderByPrice,
+            orderByDate,
         } = query;
         const skip = (Number(page) - 1) * Number(limit);
 
@@ -35,6 +37,9 @@ export const getAllTransactions = async (query: ApiTransactionQuery): Promise<Ap
                 contains: search,
                 mode: "insensitive",
             };
+        }
+        if (status) {
+            whereCondition.status = status as any;
         }
 
         const orderBy: Prisma.TransactionOrderByWithRelationInput[] = [];
@@ -46,6 +51,9 @@ export const getAllTransactions = async (query: ApiTransactionQuery): Promise<Ap
         }
         if (orderByPrice) {
             orderBy.push({ totalPrice: orderByPrice as "asc" | "desc" });
+        }
+        if (orderByDate) {
+            orderBy.push({ createdAt: orderByDate as "asc" | "desc" });
         }
         if (orderBy.length === 0) {
             orderBy.push({ createdAt: "desc" });
@@ -162,15 +170,26 @@ export const getTransactionById = async (id: string): Promise<ApiTransactionDeta
  * @author zelebwr
  * @param userId The ID of the user making the transaction.
  * @param books An array of book order items, each containing a bookId and quantity.
+ * @param shippingAddress The shipping address.
+ * @param phoneNumber The phone number.
+ * @param paymentMethod The payment method.
+ * @param bankAccount The bank account (optional, for bank transfer).
  * @return The newly created transaction object.
  * @throws Error if user not found, book not found, or insufficient stock.
  */
 export const createTransaction = async (
     userId: string,
-    books: BookOrderItem[]
+    books: BookOrderItem[],
+    shippingAddress: string,
+    phoneNumber: string,
+    paymentMethod: string,
+    bankAccount?: string
 ): Promise<CreateTransactionResponse> => {
     if (!userId || !books || books.length === 0) {
         throw new Error("Invalid input: userId and books are required.");
+    }
+    if (!shippingAddress || !phoneNumber || !paymentMethod) {
+        throw new Error("Invalid input: shippingAddress, phoneNumber, and paymentMethod are required.");
     }
     for (const item of books) {
         if (!item.bookId || !item.quantity || item.quantity <= 0) {
@@ -237,6 +256,11 @@ export const createTransaction = async (
                     userId: userId,
                     totalPrice: totalPrice,
                     totalAmount: totalQuantity,
+                    shippingAddress: shippingAddress,
+                    phoneNumber: phoneNumber,
+                    paymentMethod: paymentMethod as any,
+                    bankAccount: bankAccount || null,
+                    status: "PENDING", // Default status
                     books: {
                         create: books.map((item) => ({
                             bookId: item.bookId,

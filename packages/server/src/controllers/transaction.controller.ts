@@ -129,13 +129,20 @@ export const createTransaction = async (req: AuthRequest, res: Response) => {
             });
         }
 
-        const { books } = req.body as CreateTransactionInput;
+        const { books, shippingAddress, phoneNumber, paymentMethod, bankAccount } = req.body as CreateTransactionInput;
         
 
         if (!Array.isArray(books) || books.length === 0) {
             return res.status(400).json({
                 message:
                     "Request body must include a non-empty array of books.",
+            });
+        }
+
+        if (!shippingAddress || !phoneNumber || !paymentMethod) {
+            return res.status(400).json({
+                success: false,
+                message: "shippingAddress, phoneNumber, and paymentMethod are required.",
             });
         }
 
@@ -152,7 +159,11 @@ export const createTransaction = async (req: AuthRequest, res: Response) => {
 
         const newTransaction = await transactionService.createTransaction(
             userId,
-            books
+            books,
+            shippingAddress,
+            phoneNumber,
+            paymentMethod,
+            bankAccount
         );
 
         return res.status(201).json({
