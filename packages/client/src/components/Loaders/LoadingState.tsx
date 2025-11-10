@@ -1,6 +1,6 @@
 import React from "react";
 
-export const LoadingState: React.FC<{ message?: string }> = ({ message = "Loading..." }) => {
+export const Loading: React.FC<{ message?: string }> = ({ message = "Loading..." }) => {
   return (
     <div style={{ padding: 24, textAlign: "center" }}>
       <div role="status" aria-busy="true" style={{ marginBottom: 8 }}>

@@ -5,6 +5,9 @@ import { Button } from '../components/Button/Button';
 import { transactionAPI } from '../services/api.service';
 import type { ApiTransaction } from '@react-express-library/shared/src/types/transaction.types';
 import { useNavigate } from 'react-router-dom';
+import { EmptyState } from '../components/Loaders/EmptyState';
+import { ErrorMessage  } from '../components/Loaders/ErrorState';
+import { Loading, } from '../components/Loaders/LoadingState';
 
 export const Transactions: React.FC = () => {
   const [transactions, setTransactions] = useState<ApiTransaction[]>([]);
@@ -64,9 +67,11 @@ export const Transactions: React.FC = () => {
       </div>
 
       {loading ? (
-        <p className="text-center text-gray-500 mt-10">Memuat data...</p>
+      <Loading />
+      ) : ErrorMessage  ? (
+      <ErrorMessage message="Gagal memuat data transaksi." />
       ) : transactions.length === 0 ? (
-        <p className="text-center text-gray-500 mt-10">Belum ada transaksi.</p>
+      <EmptyState message="Belum ada transaksi." />
       ) : (
         <div className="grid gap-4">
           {transactions.map((t) => (
