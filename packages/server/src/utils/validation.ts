@@ -6,6 +6,16 @@ import {
     UpdateBookInput,
 } from "@react-express-library/shared";
 
+const isValidUrl = (urlString: string | null | undefined): boolean => {
+    if (!urlString) return true; // It's optional, so null/undefined is valid
+    try {
+        new URL(urlString);
+        return true;
+    } catch (e) {
+        return false;
+    }
+};
+
 // --- Your existing (and perfect) Auth validation ---
 export const isValiEmail = (email: string): string | null => {
     // ... (your existing logic)
@@ -97,6 +107,9 @@ export const validateBookData = (data: CreateBookInput): string[] | null => {
     if (data.stockQuantity === undefined)
         errors.push("Stock quantity is required.");
     if (!data.genreId) errors.push("Genre ID is required.");
+    if (!isValidUrl(data.coverImage)) {
+        errors.push("Cover image must be a valid URL.");
+    }
 
     // 2. Check for "illogical" values
     if (data.price < 0) errors.push("Price must be a non-negative number.");
@@ -143,6 +156,10 @@ export const validateBookUpdateData = (
             errors.push("Stock quantity must be a non-negative number.");
         if (!Number.isInteger(data.stockQuantity))
             errors.push("Stock quantity must be an integer.");
+    }
+
+    if (!isValidUrl(data.coverImage)) {
+        errors.push("Cover image must be a valid URL (e.g., https://...)");
     }
 
     return errors.length > 0 ? errors : null;
