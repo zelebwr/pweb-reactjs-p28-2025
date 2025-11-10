@@ -17,7 +17,7 @@ import {
  * @return An array of transaction objects.
  * @description List of all transactions, including user information and details about the boks in each transaction.
  */
-export const getAllTransactions = async (query: ApiTransactionQuery): Promise<ApiTransactionListResponse> => {
+export const getAllTransactions = async (query: ApiTransactionQuery, userId?: string): Promise<ApiTransactionListResponse> => {
     try {
         const {
             page = 1,
@@ -32,6 +32,12 @@ export const getAllTransactions = async (query: ApiTransactionQuery): Promise<Ap
         const skip = (Number(page) - 1) * Number(limit);
 
         const whereCondition: Prisma.TransactionWhereInput = {};
+        
+        // Filter by userId if provided (for regular users)
+        if (userId) {
+            whereCondition.userId = userId;
+        }
+        
         if (search) {
             whereCondition.id = {
                 contains: search,

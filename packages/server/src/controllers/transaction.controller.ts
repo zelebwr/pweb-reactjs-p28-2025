@@ -17,9 +17,11 @@ import { AuthRequest } from "../middlewares/auth.middleware";
  * * Handles HTTP Requests to get all transactions.
  * @author zelebwr
  */
-export const getAllTransactions = async (req: Request, res: Response) => {
+export const getAllTransactions = async (req: AuthRequest, res: Response) => {
     try {
         const query = req.query as ApiTransactionQuery;
+        const userId = req.user?.id; // Get userId from auth middleware
+        
         const paginationError = validatePagination(query.page, query.limit);
         if (paginationError) {
             return res
@@ -27,7 +29,7 @@ export const getAllTransactions = async (req: Request, res: Response) => {
                 .json({ success: false, message: paginationError });
         }
 
-        const result = await transactionService.getAllTransactions(query);
+        const result = await transactionService.getAllTransactions(query, userId);
 
         const page = Number(query.page) || 1;
         const limit = Number(query.limit) || 10;

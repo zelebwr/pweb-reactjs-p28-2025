@@ -387,6 +387,13 @@ export const handleDeleteBook = async (req: Request, res: Response) => {
     } catch (error: unknown) {
         console.error("DELETE BOOK ERROR:", error);
         if (error instanceof Error) {
+            // 409 Conflict - Book has been purchased
+            if (error.message.includes("Cannot delete this book")) {
+                return res.status(409).json({
+                    success: false,
+                    message: error.message,
+                });
+            }
             // 404 Not Found
             if (error.message.includes("Book not found")) {
                 return res.status(404).json({

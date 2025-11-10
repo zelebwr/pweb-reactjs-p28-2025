@@ -297,6 +297,26 @@ export const getBooksByGenreId = async (genreId: string, query: ApiBookQuery): P
  */
 export const deleteBookById = async (bookId: string): Promise<void> => {
     try {
+        // Check if book exists first
+        const book = await prisma.book.findUnique({
+            where: { id: bookId, deletedAt: null },
+            include: {
+                transactions: true, // Include transactions to check if book has been purchased
+            },
+        });
+
+        if (!book) {
+            throw new Error("Book not found or already removed");
+        }
+
+        // Check if book has been purchased (has transaction records)
+        if (book.transactions && book.transactions.length > 0) {
+            throw new Error(
+                "Cannot delete this book because it has been purchased by users. Book has transaction history."
+            );
+        }
+
+        // Proceed with soft delete if no transactions
         const result = await prisma.book.updateMany({
             where: {
                 id: bookId,
@@ -326,7 +346,8 @@ export const deleteBookById = async (bookId: string): Promise<void> => {
         // Re-throw our specific error
         if (
             error instanceof Error &&
-            error.message.includes("Book not found")
+            (error.message.includes("Book not found") ||
+                error.message.includes("Cannot delete this book"))
         ) {
             throw error;
         }
