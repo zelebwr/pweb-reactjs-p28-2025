@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { LoginPage, RegisterPage } from './features/auth';
 import { BooksPage } from './pages/BooksPage';
+import { ProtectedRoute } from './components';
 
 function App() {
   return (
@@ -13,8 +14,15 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         
-        {/* Protected routes (will add protection later) */}
-        <Route path="/books" element={<BooksPage />} />
+        {/* Protected routes */}
+        <Route
+          path="/books"
+          element={
+            <ProtectedRoute>
+              <BooksPage />
+            </ProtectedRoute>
+          }
+        />
         
         {/* 404 - catch all */}
         <Route path="*" element={<Navigate to="/login" replace />} />
