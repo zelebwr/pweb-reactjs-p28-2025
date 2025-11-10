@@ -74,6 +74,27 @@ This project uses `pnpm` to manage dependencies. We enforce a specific version u
 
 ### 🔒 Authentication
 
+#### 1. auth_error-missing-@
+![@](./images/auth_error-missing-@.png)
+#### 2. auth_error-missing-domain
+![domain](./images/auth_error-missing-domain.png)
+
+#### 3. auth_error-pswd
+![error1](./images/auth_error-pswd.png)
+
+#### 4. auth_error-pswd2
+![error2](./images/auth_error-pswd2.png)
+
+#### 5. auth_success-register
+![register](./images/auth_success-register.png)
+
+#### 6. auth_error-login-pswd
+![error-login](./images/auth_error-login-pswd.png)
+
+#### 7. auth_success-register
+![login](./images/auth_success-login.png)
+
+
 ### 📚 Book Management
 
 #### 1. Book List
