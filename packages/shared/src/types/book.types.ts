@@ -18,7 +18,7 @@ export type CreateBookInput = Omit<
  * Data for the "Edit Book" form (PATCH /books/:id).
  */
 export type UpdateBookInput = Partial<
-    Pick<Book, "description" | "price" | "stockQuantity">
+    Pick<Book, "description" | "price" | "stockQuantity" | 'coverImage'>
 >;
 
 /**

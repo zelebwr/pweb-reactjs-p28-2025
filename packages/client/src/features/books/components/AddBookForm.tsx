@@ -31,14 +31,15 @@ export function AddBookForm() {
     publisher: '',
     publicationYear: '',
     description: '',
-    coverImage: null as File | null,
+    coverImage: '',
     price: '',
     stockQuantity: '',
     genreId: '',
     condition: 'NEW'
   });
   
-  const [imagePreview, setImagePreview] = useState<string>('');
+  // Image preview state for cover image for now is not used.
+  // const [imagePreview, setImagePreview] = useState<string>('');
 
   // Validation errors
   const [errors, setErrors] = useState({
@@ -48,7 +49,8 @@ export function AddBookForm() {
     publicationYear: '',
     price: '',
     stockQuantity: '',
-    genreId: ''
+    genreId: '',
+    coverImage: '',
   });
 
   // Fetch genres on component mount
@@ -110,6 +112,15 @@ export function AddBookForm() {
       case 'genreId':
         return value === '' ? 'Please select a genre' : '';
 
+      case 'coverImage':
+        if (value.trim() === '') return '';
+        try {
+          new URL(value); 
+          return '';
+        } catch (e) {
+          return 'Must be a valid URL (e.g., https://example.com/image.png)';
+        }
+
       default:
         return '';
     }
@@ -138,7 +149,7 @@ export function AddBookForm() {
   };
 
   // Handle file upload
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  /* const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       // Validate file type
@@ -160,7 +171,7 @@ export function AddBookForm() {
       reader.readAsDataURL(file);
       setError('');
     }
-  };
+  }; */
 
   // Validate all fields
   const validateForm = (): boolean => {
@@ -171,7 +182,8 @@ export function AddBookForm() {
       publicationYear: validateField('publicationYear', formData.publicationYear),
       price: validateField('price', formData.price),
       stockQuantity: validateField('stockQuantity', formData.stockQuantity),
-      genreId: validateField('genreId', formData.genreId)
+      genreId: validateField('genreId', formData.genreId),
+      coverImage: validateField('coverImage', formData.coverImage),
     };
 
     setErrors(newErrors);
@@ -193,14 +205,14 @@ export function AddBookForm() {
 
     try {
       // Convert image to base64 if exists
-      let coverImageData: string | null = null;
+      /* let coverImageData: string | null = null;
       if (formData.coverImage) {
         coverImageData = await new Promise<string>((resolve) => {
           const reader = new FileReader();
           reader.onloadend = () => resolve(reader.result as string);
           reader.readAsDataURL(formData.coverImage as File);
         });
-      }
+      } */
 
       await createBook({
         title: formData.title.trim(),
@@ -208,7 +220,7 @@ export function AddBookForm() {
         publisher: formData.publisher.trim(),
         publicationYear: parseInt(formData.publicationYear),
         description: formData.description.trim() || null,
-        coverImage: coverImageData,
+        coverImage: formData.coverImage.trim() || null,
         price: parseFloat(formData.price),
         stockQuantity: parseInt(formData.stockQuantity),
         genreId: formData.genreId,
@@ -363,14 +375,14 @@ export function AddBookForm() {
 
           {/* Cover Image (Optional) */}
           <div>
-            <label className="block text-sm font-medium text-dark-blue mb-2">
+            {/* <label className="block text-sm font-medium text-dark-blue mb-2">
               Cover Image <span className="text-gray-400 text-xs">(Optional - PNG, JPG, max 2MB)</span>
             </label>
             <input
               type="file"
               accept="image/*"
               onChange={handleFileChange}
-              className="w-full px-4 py-2 border border-sky-blue rounded-lg focus:outline-none focus:ring-2 focus:ring-medium-blue focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-sky-blue file:text-dark-blue hover:file:bg-medium-blue hover:file:text-white file:cursor-pointer"
+              className="w-full px-4 py-2 border border-sky-blue roundelabeld-lg focus:outline-none focus:ring-2 focus:ring-medium-blue focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-sky-blue file:text-dark-blue hover:file:bg-medium-blue hover:file:text-white file:cursor-pointer"
             />
             {imagePreview && (
               <div className="mt-3">
@@ -378,6 +390,26 @@ export function AddBookForm() {
                 <img 
                   src={imagePreview} 
                   alt="Cover preview" 
+                  className="w-40 h-56 object-cover rounded-lg border-2 border-sky-blue"
+                />
+              </div>
+            )} */}
+            <Input
+              label="Cover Image URL"
+              type="text"
+              placeholder="https://example.com/image.png"
+              value={formData.coverImage}
+              onChange={(e) => handleChange('coverImage', e.target.value)}
+              onBlur={() => handleBlur('coverImage')}
+              error={errors.coverImage}
+              helperText="Optional - Paste a URL to an image"
+            />
+            {formData.coverImage && !errors.coverImage && (
+              <div className="mt-3">
+                <p className="text-sm text-gray-600 mb-2">Preview:</p>
+                <img
+                  src={formData.coverImage}
+                  alt="Cover preview"
                   className="w-40 h-56 object-cover rounded-lg border-2 border-sky-blue"
                 />
               </div>
