@@ -1,3 +1,3 @@
 export { CartPage } from './CartPage';
-export { useCart } from './hooks/useCart';
-export type { CartItem } from './hooks/useCart';
+export { CartProvider, useCart } from './contexts/CartContext';
+export type { CartItem } from './contexts/CartContext';

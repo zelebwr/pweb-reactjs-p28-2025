@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Button, Toast, type ToastType } from '../../../components';
-import { useCart } from '../../cart/hooks/useCart';
+import { useCart } from '../../cart';
 import type { ApiBook } from '@react-express-library/shared';
 
 interface BookCardProps {

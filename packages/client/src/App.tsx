@@ -1,13 +1,14 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { LoginPage, RegisterPage } from './features/auth';
-import { CartPage } from './features/cart';
+import { CartPage, CartProvider } from './features/cart';
 import { TransactionsPage, TransactionDetailPage } from './features/transactions';
 import { BooksPage, AddBookPage, BookDetailPage, EditBookPage } from './pages';
 import { ProtectedRoute } from './components';
 
 function App() {
   return (
-    <Router>
+    <CartProvider>
+      <Router>
       <Routes>
         {/* Redirect root to login */}
         <Route path="/" element={<Navigate to="/login" replace />} />
@@ -78,6 +79,7 @@ function App() {
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>
+    </CartProvider>
   );
 }
 

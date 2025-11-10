@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { LibraryLogo } from '../Logo/LibraryLogo';
 import { getCurrentUser } from '../../features/auth/api/authApi';
 import { logout as logoutApi } from '../../features/auth/api/authApi';
-import { useCart } from '../../features/cart/hooks/useCart';
+import { useCart } from '../../features/cart';
 import type { PublicUser } from '@react-express-library/shared';
 
 export const Navbar = () => {
