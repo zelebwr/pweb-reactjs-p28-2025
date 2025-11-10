@@ -76,4 +76,68 @@ This project uses `pnpm` to manage dependencies. We enforce a specific version u
 
 ### 📚 Book Management
 
+#### 1. Book List
+
+![book list](./images/book-list.png)
+
+##### Max Page
+
+![max book per pages](./images/max-page.png)
+
+##### Search Book
+
+![Search book](./images/search-book.png)
+
+##### Sort Book Descending Order
+
+![sort desc](./images/sort-desc.png)
+
+##### Sort Book Newest Publication Date
+
+![sort newest](./images/sort-new.png)
+
+##### Sort Book Conditionally
+
+![sort newest](./images/sort-condition.png)
+
+#### 2. Book Details
+
+![Book details](./images/book-details.png)
+
+##### Edit Book
+
+![edit book](./images/edit-book.png)
+
+##### Delete Book
+
+![delete book](./images/delete-book.png)
+
+#### 3. Add Book
+
+![add book](./images/add-book.png)
+
+##### Conditional Dropdown
+
+![conditional dropdown](./images/condition-dropdown.png)
+
+##### Genre Dropdown
+
+![Genre dropdown](./images/genre-dropdown.png)
+
+##### Image Preview
+
+![image url](./images/image-url-preview.png)
+
+##### Required Fields
+
+![required](./images/required-field.png)
+
+##### Year Error Handling 1
+
+![year error handling 1](./images/year-error-handling.png)
+
+##### Year Error Handling 2
+
+![year error handling 1](./images/year-error-handling-2.png)
+
 ### 📃 Transaction
